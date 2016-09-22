@@ -5,6 +5,7 @@ import android.content.Context;
 import com.example.saurabh.rxsample.R;
 
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
@@ -21,6 +22,7 @@ public class GitHubClient {
     public static WebService getClient(Context context){
         if (webService==null){
             Retrofit retrofit=new Retrofit.Builder()
+                    .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                     .baseUrl(context.getString(R.string.server_url))
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
