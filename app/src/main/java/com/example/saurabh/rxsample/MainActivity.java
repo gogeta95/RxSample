@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }).debounce(MSG_UPDATE_DELAY, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
                 .flatMap(new Func1<CharSequence, Observable<SearchResponse>>() {
                     @Override
                     public Observable<SearchResponse> call(CharSequence charSequence) {
