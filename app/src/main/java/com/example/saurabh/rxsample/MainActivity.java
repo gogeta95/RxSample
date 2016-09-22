@@ -1,7 +1,6 @@
 package com.example.saurabh.rxsample;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -12,6 +11,7 @@ import android.view.MenuItem;
 import com.example.saurabh.rxsample.data.SearchResponse;
 import com.example.saurabh.rxsample.rest.GitHubClient;
 import com.jakewharton.rxbinding.support.v7.widget.RxSearchView;
+import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
 import java.util.concurrent.TimeUnit;
 
@@ -24,7 +24,7 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends RxAppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final long MSG_UPDATE_DELAY = 300;
     SearchView searchView;
@@ -46,12 +46,14 @@ public class MainActivity extends AppCompatActivity {
         MenuItem item = menu.findItem(R.id.action_search);
         searchView = (SearchView) item.getActionView();
         searchView.setMaxWidth(Integer.MAX_VALUE);
-        subscription = RxSearchView.queryTextChanges(searchView).filter(new Func1<CharSequence, Boolean>() {
-            @Override
-            public Boolean call(CharSequence charSequence) {
-                return charSequence.length() > 2;
-            }
-        }).debounce(MSG_UPDATE_DELAY, TimeUnit.MILLISECONDS)
+        subscription = RxSearchView.queryTextChanges(searchView)
+                .compose(this.<CharSequence>bindToLifecycle())
+                .filter(new Func1<CharSequence, Boolean>() {
+                    @Override
+                    public Boolean call(CharSequence charSequence) {
+                        return charSequence.length() > 2;
+                    }
+                }).debounce(MSG_UPDATE_DELAY, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(Schedulers.io())
                 .flatMap(new Func1<CharSequence, Observable<SearchResponse>>() {
